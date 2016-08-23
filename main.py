@@ -80,32 +80,10 @@ def on_draw():
 
     glPointSize(2)
     glColor3f(1,1,1)
-    #glBegin(GL_POINTS)
-    #for l in points:
-    #    glVertex3f(*l)
-    #glEnd()
-
-    glBegin(GL_LINES)
-    for l in lines:
+    glBegin(GL_POINTS)
+    for l in points:
         glVertex3f(*l)
     glEnd()
-
-
-    #Push Matrix onto stack
-    #glPushMatrix()
-
-    #glTranslatef(20, 0, 0)
-
-    # Draw the six sides of the cube
-    #glBegin(GL_QUADS)
-
-    #glEnd()
-    ## Pop Matrix off stack
-    #glPopMatrix()
-
-
-
-
 
 
 @window.event
@@ -214,14 +192,6 @@ for z in range(0, numx*size*2, spacing):
 
 world_box = Cube((0,0,0), 800)
 world_box.colors = ((0.7,0.7,0.7), (0.4, 0.4, 0.4))*6
-
-lines = [(-800, 800, 800),
-         ( 800, 800, 800),
-         (-800, 800, 800),
-         ( 800,-800, 800),
-         (-800, 800, 800),
-         ( 800, 800,-800)
-        ]
 
 points = []
 world_grid_size = 800
