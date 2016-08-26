@@ -76,3 +76,11 @@ class Cube():
         glVertex3f( self.size,-self.size,-self.size)
         glVertex3f( self.size,-self.size, self.size)
 
+    def collidePoint(self, vec3):
+        collision = True
+
+        for i in xrange(3):
+            collision &= (self.i3[i] - self.size) < vec3[i] < (self.i3[i] + self.size)
+
+        return collision
+
