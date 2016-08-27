@@ -5,9 +5,10 @@ __all__ = ["Cube"]
 
 
 class Cube():
-    def __init__(self, i3, size):
+    def __init__(self, pos, size, angle=[0, 0, 0]):
         self.size = size
-        self.i3 = i3
+        self.pos = pos
+        self.angle = angle
         self.colors = [
                 (1,0,0),
                 (0.5,0,0),
@@ -25,7 +26,7 @@ class Cube():
 
     def draw(self):
         #glLoadIdentity()
-        #glTranslatef(*self.i3)
+        #glTranslatef(*self.pos)
         #glColor3ub(255, 255, 0)
 
         # Front
@@ -80,7 +81,9 @@ class Cube():
         collision = True
 
         for i in xrange(3):
-            collision &= (self.i3[i] - self.size) < vec3[i] < (self.i3[i] + self.size)
+            collision &= (self.pos[i] - self.size) < vec3[i] < (self.pos[i] + self.size)
 
         return collision
 
+    def __repr__(self):
+        return "<Cube((%d, %d, %d))>"%(self.pos[0], self.pos[1], self.pos[2])
