@@ -6,15 +6,16 @@ __all__ = ["Player"]
 
 
 class Player:
-    def __init__(self, pos, angle=[0, 0, 0]):
+    def __init__(self, pos, angle=[0, 0, 0], network_player = False):
         self.pos = pos
         self.angle = angle
         # Length is always +1 so that when not drawing the first box it's the
         # right length
+        self.network_player = network_player
         self.initial_length = 21
         self.length = self.initial_length
         self.tail = []
-        self.rotation_rate = [60, 63]
+        self.rotation_rate = [60, 70]
         self.move_rate = 330
         self.chunk_dist = 30
 

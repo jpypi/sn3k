@@ -4,6 +4,7 @@ import sys
 import math
 import itertools
 import random
+from threading import Thread
 
 import pyglet
 from pyglet.gl import *
@@ -45,7 +46,47 @@ fps_display = pyglet.clock.ClockDisplay(helv_font, color=(1, 0, 0, 0.3))
 fov = 65 #40
 world_size = 800
 n_food = 4
-player = Player([0,0,-400])
+snakes = [Player([0,0,-400]), Player([0,0,0],network_player=True)]
+player = snakes[0]
+
+import socket
+import struct
+from network_utils import *
+
+def network_update():
+    s = socket.socket()
+    s.connect(("localhost", 4588))
+
+    # Initial handshake
+    s.send(struct.pack(">ii", GIVE_ID, GIVE_ID_N))
+    d = s.recv(4)
+    my_id = struct.unpack(">i", d)[0]
+    print("My id is: {%d}"%my_id)
+
+    while True:
+        tail = player.tail[:]
+        header = struct.pack(">ii", my_id, len(tail))
+        data = ""
+        for block in tail:
+            data += struct.pack(">iiii", TAIL_BLOCK, *map(int, block.pos))
+        s.sendall(header+data)
+
+        n_user_data_objects = struct.unpack(">i", s.recv(4))[0]
+        #print("There are %d user data objects coming"%n_user_data_objects)
+        for i in xrange(n_user_data_objects):
+            user_id, n_objs = RecieveHeader(s)
+            #print(user_id, n_objs)
+            values = RecieveObjects(s, n_objs)
+            if user_id != my_id:
+                snakes[1].tail = map(lambda v: Cube([v[1],v[2],v[3]], 10),
+                                     grouper(values, 4))
+
+    s.close()
+
+
+t = Thread(target=network_update)
+t.setDaemon(True)
+t.start()
 
 
 # Use a decorater to register a custom action for the on_draw event
@@ -78,7 +119,8 @@ def on_draw():
         AddRandomFood()
         del food[iv-i]
 
-    player.draw()
+    for snake in snakes:
+        snake.draw()
 
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE)
     glColor3f(1,1,1)
@@ -171,8 +213,8 @@ def main_update(dt):
     #    print(fov)
     #    on_resize(window.width, window.height)
 
-    #if keyboard[key.SPACE]:
-    move_facing(player.move_rate*dt)
+    if keyboard[key.SPACE]:
+        move_facing(player.move_rate*dt)
 
     if keyboard[key.W]:
         player.angle[0] -= (player.angle[0] > -50)*dt*player.rotation_rate[0]
