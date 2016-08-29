@@ -46,7 +46,7 @@ fps_display = pyglet.clock.ClockDisplay(helv_font, color=(1, 0, 0, 0.3))
 fov = 65 #40
 world_size = 800
 n_food = 4
-snakes = [Player([0,0,-400]), Player([0,0,0],network_player=True)]
+snakes = {0: Player([0, 0, -400])}
 player = snakes[0]
 
 import socket
@@ -55,7 +55,7 @@ from network_utils import *
 
 def network_update():
     s = socket.socket()
-    s.connect(("localhost", 4588))
+    s.connect(("192.168.1.103", 4588))
 
     # Initial handshake
     s.send(struct.pack(">ii", GIVE_ID, GIVE_ID_N))
@@ -63,7 +63,7 @@ def network_update():
     my_id = struct.unpack(">i", d)[0]
     print("My id is: {%d}"%my_id)
 
-    while True:
+    while NETWORKING_ACTIVE:
         tail = player.tail[:]
         header = struct.pack(">ii", my_id, len(tail))
         data = ""
@@ -72,21 +72,28 @@ def network_update():
         s.sendall(header+data)
 
         n_user_data_objects = struct.unpack(">i", s.recv(4))[0]
-        #print("There are %d user data objects coming"%n_user_data_objects)
         for i in xrange(n_user_data_objects):
             user_id, n_objs = RecieveHeader(s)
-            #print(user_id, n_objs)
-            values = RecieveObjects(s, n_objs)
-            if user_id != my_id:
-                snakes[1].tail = map(lambda v: Cube([v[1],v[2],v[3]], 10),
-                                     grouper(values, 4))
+            # No need to try to recieve objects if there aren't any coming
+            if n_objs:
+                values = RecieveObjects(s, n_objs)
+                if user_id != my_id:
+                    sn = snakes.setdefault(user_id,
+                            Player([0,0,0], network_player=True))
+                    sn.tail = map(lambda v: Cube([v[1],v[2],v[3]], 10),
+                                         grouper(values, 4))
 
     s.close()
 
 
+NETWORKING_ACTIVE = True
 t = Thread(target=network_update)
-t.setDaemon(True)
 t.start()
+
+@window.event
+def on_close():
+    global NETWORKING_ACTIVE
+    NETWORKING_ACTIVE = False
 
 
 # Use a decorater to register a custom action for the on_draw event
@@ -119,7 +126,7 @@ def on_draw():
         AddRandomFood()
         del food[iv-i]
 
-    for snake in snakes:
+    for snake in snakes.values():
         snake.draw()
 
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE)
