@@ -52,6 +52,7 @@ player = snakes[0]
 import socket
 import struct
 from network_utils import *
+DEBUG = False
 
 def network_update():
     s = socket.socket()
@@ -64,18 +65,23 @@ def network_update():
     print("My id is: {%d}"%my_id)
 
     while NETWORKING_ACTIVE:
+        if DEBUG: print("Going")
         tail = player.tail[:]
         header = struct.pack(">ii", my_id, len(tail))
         data = ""
         for block in tail:
             data += struct.pack(">iiii", TAIL_BLOCK, *map(int, block.pos))
+        if DEBUG: print("Sending my data")
         s.sendall(header+data)
 
+        if DEBUG: print("Recieving n for udo")
         n_user_data_objects = struct.unpack(">i", s.recv(4))[0]
         for i in xrange(n_user_data_objects):
+            if DEBUG: print("Recieving header")
             user_id, n_objs = RecieveHeader(s)
             # No need to try to recieve objects if there aren't any coming
             if n_objs:
+                if DEBUG: print("Recieving objects")
                 values = RecieveObjects(s, n_objs)
                 if user_id != my_id:
                     sn = snakes.setdefault(user_id,
