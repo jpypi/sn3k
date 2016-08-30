@@ -12,15 +12,15 @@ class Player:
         # Length is always +1 so that when not drawing the first box it's the
         # right length
         self.network_player = network_player
-        self.initial_length = 21
+        self.initial_length = 11
         self.length = self.initial_length
         self.tail = []
-        self.rotation_rate = [60, 70]
+        self.rotation_rate = [62, 75]
         self.move_rate = 330
         self.chunk_dist = 30
 
     def getSize(self):
-        return self.length - 1
+        return self.length - self.initial_length
 
     def ateFood(self):
         self.length += 5
