@@ -56,7 +56,7 @@ DEBUG = False
 
 def network_update():
     s = socket.socket()
-    s.connect(("192.168.1.103", 4588))
+    s.connect(("perplexed.duckdns.org", 4588))
 
     # Initial handshake
     s.send(struct.pack(">ii", GIVE_ID, GIVE_ID_N))
