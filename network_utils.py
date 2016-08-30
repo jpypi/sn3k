@@ -7,12 +7,21 @@ TAIL_BLOCK = 0b01
 FOOD_BLOCK = 0b10
 
 
+def ExpectRecv(connection, n):
+    data = ""
+    while len(data) < n:
+        data += connection.recv(n-len(data))
+    return data
+
+
 def RecieveHeader(connection):
     return struct.unpack(">ii", connection.recv(8))
 
 
 def RecieveObjects(connection, n_objs):
-    raw_data = connection.recv(4*4*n_objs)
+    #print("Recieveing %d n_objs"%n_objs)
+    raw_data = ExpectRecv(connection, 4*4*n_objs)
+    #print("raw data size: %d"%len(raw_data))
     return struct.unpack(">"+"i"*(n_objs*4), raw_data)
 
 
