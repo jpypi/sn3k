@@ -3,6 +3,7 @@
 import socket
 import struct
 import random
+import signal
 import itertools
 from threading import Thread
 
@@ -16,6 +17,7 @@ food = []
 
 def ClientHandler(client):
     # Handshake
+    client.setblocking(0)
     try:
         client_id, n_objs = RecieveHeader(client)
         if client_id == GIVE_ID and n_objs == GIVE_ID_N:
@@ -28,8 +30,9 @@ def ClientHandler(client):
             print("Giving out id {%d}"%new_id)
             client.sendall(struct.pack(">i", new_id))
             client_id, n_objs = RecieveHeader(client)
+            print(client_id, n_objs)
 
-        while client_id != CLOSE_CONN:
+        while client_id != CLOSE_CONN and NETWORKING_ACTIVE:
             client_states[client_id] = RecieveObjects(client, n_objs)
 
             # Make a copy of the states just incase another thread tries to do
@@ -48,10 +51,12 @@ def ClientHandler(client):
                 client.sendall(header+data)
 
             client_id, n_objs = RecieveHeader(client)
+
     except:
         print("Issue communicating with client.")
 
     finally:
+        print("Removing client")
         del client_states[client_id]
         client.close()
 
@@ -62,7 +67,16 @@ s.bind(("", 4588))
 
 s.listen(5)
 
-while True:
+NETWORKING_ACTIVE = True
+def SignalHandler(signal, frame):
+    global NETWORKING_ACTIVE
+    NETWORKING_ACTIVE = False
+
+# Close nicely on ctrl-c
+signal.signal(signal.SIGINT, SignalHandler)
+
+
+while NETWORKING_ACTIVE:
     client, client_addr = s.accept()
 
     print(client_addr)

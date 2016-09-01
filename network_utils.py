@@ -1,4 +1,6 @@
 import struct
+import select
+import time
 
 GIVE_ID = 0x22222222
 GIVE_ID_N = 42
@@ -9,8 +11,10 @@ FOOD_BLOCK = 0b10
 
 def ExpectRecv(connection, n):
     data = ""
-    while len(data) < n:
-        data += connection.recv(n-len(data))
+    start = time.time()
+    while len(data) < n and time.time() - start < 0.5:
+        if select.select([connection],[],[], 0.5)[0]:
+            data += connection.recv(n-len(data))
     return data
 
 
