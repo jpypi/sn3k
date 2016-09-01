@@ -235,8 +235,8 @@ def main_update(dt):
     #    print(fov)
     #    on_resize(window.width, window.height)
 
-    if keyboard[key.SPACE]:
-        move_facing(player.move_rate*dt)
+    #if keyboard[key.SPACE]:
+    move_facing(player.move_rate*dt)
 
     if keyboard[key.W]:
         player.angle[0] -= (player.angle[0] > -50)*dt*player.rotation_rate[0]
