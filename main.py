@@ -91,8 +91,7 @@ def network_update():
                     last_ids.append(user_id)
                     sn = snakes.setdefault(user_id,
                             Player([0,0,0], network_player=True))
-                    sn.tail = map(lambda v: Cube([v[1],v[2],v[3]], 10),
-                                         grouper(values, 4))
+                    sn.tail = map(lambda v: Cube([v[1],v[2],v[3]], 10), values)
 
         for key in snakes.keys():
             if key != 0 and key not in last_ids:
