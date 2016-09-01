@@ -53,10 +53,21 @@ import socket
 import struct
 from network_utils import *
 DEBUG = False
+ERR_PREFIX = "** Error: "
 
 def network_update():
     s = socket.socket()
-    s.connect(("perplexed.duckdns.org", 4588))
+    host = "perplexed.duckdns.org"
+    try:
+        s.connect((host, 4588))
+    except socket.error as e:
+        # 61 is unreachable
+        if e.errno == 61:
+            print(ERR_PREFIX + "Could not connect to '%s'"%host)
+        else:
+            print(e)
+        return
+
 
     # Initial handshake
     s.send(struct.pack(">ii", GIVE_ID, GIVE_ID_N))
@@ -93,6 +104,7 @@ def network_update():
                             Player([0,0,0], network_player=True))
                     sn.tail = map(lambda v: Cube([v[1],v[2],v[3]], 10), values)
 
+        # Clean up old, dead snakes
         for key in snakes.keys():
             if key != 0 and key not in last_ids:
                 del snakes[key]
